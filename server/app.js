@@ -82,6 +82,25 @@ app.get('/login',
     res.render('login');
   });
 
+  app.post('/login', (req, res) => {
+    var username = req.body.username;
+    var pw = req.body.password;
+    //console.log('this is the login req', req.hash);
+
+    models.Users.get({username})
+      .then(user => {
+        if (user && models.Users.compare(pw, user.password, user.salt)) {
+          // models.Sessions.update({hash: req})
+          res.redirect('/');
+        } else {
+          throw user;
+        }
+      })
+      .catch( user => {
+        res.redirect('/login');
+      })
+  })
+
 app.get('/signup',
   (req, res) => {
     res.render('signup');
@@ -101,15 +120,19 @@ app.post('/signup', (req, res) => {
     })
     .then(userData => models.Sessions.create(userData))
     .then(() => {
-      res.redirect('index');
+      res.redirect('/');
     })
     .catch(user => {
-      res.redirect('signup');
+      res.redirect('/signup');
     });
 
 
 
 });
+
+var verifySession = (req, res, callback) =>{
+
+}
 /************************************************************/
 // Handle the code parameter route last - if all other routes fail
 // assume the route is a short code and try and handle it here.
